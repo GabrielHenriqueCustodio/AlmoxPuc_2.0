@@ -1,0 +1,28 @@
+.home {
+  display: flex;
+  height: 100vh;
+}
+
+.frame {
+  width: calc(100% - 5%);
+  margin-left: 5%;
+  background-color: #f9f9f9;
+  height: 100%;
+  padding-left: 4%;
+  transition: margin-left 0.6s ease;
+  height: 100vh;
+}
+
+@media (max-width: 900px) {
+  .home {
+    flex-direction: column;
+    padding-top: 60px;
+  }
+
+  .frame {
+    width: 100% !important;
+    margin-left: 0 !important;
+    padding-left: 0;
+    height: calc(100vh - 60px);
+  }
+}
