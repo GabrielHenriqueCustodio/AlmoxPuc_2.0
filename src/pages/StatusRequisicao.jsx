@@ -6,31 +6,49 @@ function StatusRequisicao() {
   const [expandedCard, setExpandedCard] = useState(null);
   const [filtroStatus, setFiltroStatus] = useState("");
 
-  useEffect(() => {
-    const requisicoesSalvas = localStorage.getItem("requisicoes");
-    if (requisicoesSalvas) {
-      setRequisicoes(JSON.parse(requisicoesSalvas));
+  const fetchRequisicoes = async () => {
+    try {
+      const response = await fetch("http://localhost:3333/emprestimos");
+      const data = await response.json();
+      setRequisicoes(data);
+    } catch (error) {
+      console.error("Erro ao buscar requisições:", error);
+      alert("Erro ao carregar requisições do servidor.");
     }
-  }, []);
-
-  const handleToggleExpand = (numeroRequisicao) => {
-    setExpandedCard(
-      expandedCard === numeroRequisicao ? null : numeroRequisicao
-    );
   };
 
-  const handleChangeStatus = (numeroRequisicao) => {
-    const updatedRequisicoes = requisicoes.map((req) =>
-      req.numero === numeroRequisicao
-        ? {
-            ...req,
-            status: req.status === "emprestada" ? "devolvida" : "emprestada",
-          }
-        : req
-    );
+  useEffect(() => {
+    fetchRequisicoes();
+  }, []);
 
-    setRequisicoes(updatedRequisicoes);
-    localStorage.setItem("requisicoes", JSON.stringify(updatedRequisicoes));
+  const handleToggleExpand = (id) => {
+    setExpandedCard(expandedCard === id ? null : id);
+  };
+
+  const handleChangeStatus = async (id, statusAtual) => {
+    const novoStatus = statusAtual === "emprestada" ? "devolvida" : "emprestada";
+    const body = { status: novoStatus };
+
+    if (novoStatus === "devolvida") {
+      body.data_devolucao = new Date().toISOString();
+    }
+
+    try {
+      const response = await fetch(`http://localhost:3333/emprestimos/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+
+      if (!response.ok) {
+        throw new Error("Erro ao atualizar status.");
+      }
+
+      fetchRequisicoes();
+    } catch (error) {
+      console.error("Erro ao atualizar status:", error);
+      alert("Erro ao atualizar status da requisição.");
+    }
   };
 
   const handleFiltroChange = (event) => {
@@ -61,46 +79,50 @@ function StatusRequisicao() {
         <div className={styles.listContainer}>
           {requisicoesFiltradas.map((requisicao) => (
             <div
-              key={requisicao.numero}
+              key={requisicao.id}
               className={`${styles.requisicaoCard} ${
-                expandedCard === requisicao.numero ? styles.expanded : ""
+                expandedCard === requisicao.id ? styles.expanded : ""
               }`}
             >
               <div className={styles.requisicaoHeader}>
-                <span>Requisição Nº {requisicao.numero}</span>
+                <span>Requisição ID: {requisicao.id}</span>
                 <button
                   className={`${styles.expandButton} ${
-                    expandedCard === requisicao.numero ? styles.open : ""
+                    expandedCard === requisicao.id ? styles.open : ""
                   }`}
-                  onClick={() => handleToggleExpand(requisicao.numero)}
+                  onClick={() => handleToggleExpand(requisicao.id)}
                 >
-                  {expandedCard === requisicao.numero ? "-" : "+"}
+                  {expandedCard === requisicao.id ? "-" : "+"}
                 </button>
               </div>
 
-              {expandedCard === requisicao.numero && (
+              {expandedCard === requisicao.id && (
                 <div className={styles.requisicaoDetails}>
                   <p>
-                    <strong>Funcionário:</strong> {requisicao.funcionario}
+                    <strong>Funcionário:</strong> {requisicao.nome_funcionario}
                   </p>
                   <p>
-                    <strong>Ferramenta:</strong> {requisicao.ferramenta}
-                  </p>
-                  <p>
-                    <strong>Quantidade:</strong> {requisicao.quantidade}
-                  </p>
-                  <p>
-                    <strong>Patrimônio:</strong> {requisicao.patrimonio}
+                    <strong>Ferramenta:</strong> {requisicao.nome_ferramenta}
                   </p>
                   <p>
                     <strong>Tipo:</strong> {requisicao.tipo}
                   </p>
                   <p>
+                    <strong>Quantidade:</strong> {requisicao.quantidade}
+                  </p>
+
+                  {requisicao.tipo === "eletrica" && (
+                    <p>
+                      <strong>Patrimônio:</strong> {requisicao.numero_identificacao}
+                    </p>
+                  )}
+
+                  <p>
                     <strong>Status:</strong> {requisicao.status}
                   </p>
 
                   <button
-                    onClick={() => handleChangeStatus(requisicao.numero)}
+                    onClick={() => handleChangeStatus(requisicao.id, requisicao.status)}
                     className={styles.statusButton}
                   >
                     {requisicao.status === "emprestada"

@@ -1,21 +1,38 @@
 import React, { useState, useEffect } from 'react';
-import { ferramentas } from '../api/apiTest';
 import styles from './Ferramentas.module.css';
 
 const Ferramentas = () => {
-  const [ferramentasFiltradas, setFerramentasFiltradas] = useState(ferramentas);
+  const [ferramentas, setFerramentas] = useState([]);
+  const [ferramentasFiltradas, setFerramentasFiltradas] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filtroTipo, setFiltroTipo] = useState('');
 
+  // Buscar ferramentas do back-end
   useEffect(() => {
-    const filteredFerramentas = ferramentas.filter((ferramenta) => {
+    const fetchFerramentas = async () => {
+      try {
+        const response = await fetch('http://localhost:3333/ferramentas');
+        const data = await response.json();
+        setFerramentas(data);
+        setFerramentasFiltradas(data);
+      } catch (error) {
+        console.error('Erro ao buscar ferramentas:', error);
+      }
+    };
+
+    fetchFerramentas();
+  }, []);
+
+  // Filtrar ferramentas
+  useEffect(() => {
+    const filtered = ferramentas.filter((ferramenta) => {
       const isNomeMatch = ferramenta.nome.toLowerCase().includes(searchTerm.toLowerCase());
       const isTipoMatch = filtroTipo ? ferramenta.tipo === filtroTipo : true;
       return isNomeMatch && isTipoMatch;
     });
 
-    setFerramentasFiltradas(filteredFerramentas);
-  }, [searchTerm, filtroTipo]);
+    setFerramentasFiltradas(filtered);
+  }, [searchTerm, filtroTipo, ferramentas]);
 
   return (
     <div className={styles.container}>
@@ -43,6 +60,7 @@ const Ferramentas = () => {
           <div key={ferramenta.id} className={styles.ferramentaBox}>
             <h3 className={styles.ferramentaNome}>{ferramenta.nome}</h3>
             <p className={styles.ferramentaQuantidade}>Quantidade: {ferramenta.quantidade}</p>
+            <p className={styles.ferramentaTipo}>Tipo: {ferramenta.tipo}</p>
           </div>
         ))}
       </div>

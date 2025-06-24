@@ -13,11 +13,14 @@
 
 .cardsContainer {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 20px;
 }
 
 .card {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     background-color: #f0f0f0;
     padding: 20px;
     border-radius: 8px;
@@ -69,13 +72,15 @@ button:hover {
     gap: 10px;
 }
 
-.selectPatrimonio label {
-    margin-right: 20px;
+.selectPatrimonio select {
+    width: 100%;
+    margin-top: 5px;
 }
 
 .inputRelatorio {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     flex-direction: row;
     margin-top: 10px;
 }
@@ -84,8 +89,23 @@ button:hover {
     flex: 1;
 }
 
+.inputRelatorio select {
+    width: 30%;
+}
+
 .inputRelatorio button {
     white-space: nowrap;
+}
+
+.resultadoRelatorio {
+    border-top: 2px solid #ccc;
+    margin-top: 20px;
+    padding-top: 15px;
+}
+
+.resultadoRelatorio ul {
+    list-style: none;
+    padding-left: 0;
 }
 
 @media (max-width: 900px) {
@@ -109,6 +129,7 @@ button:hover {
     }
 
     .inputRelatorio input,
+    .inputRelatorio select,
     .inputRelatorio button {
         width: 100%;
     }
